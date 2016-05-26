@@ -1,0 +1,74 @@
+.. _separating concerns: https://en.wikipedia.org/wiki/Separation_of_concerns
+.. _the decorator pattern: https://en.wikipedia.org/wiki/Decorator_pattern
+
+.. _client-decorator:
+
+Decorating a client
+===================
+
+A 'decorating client' (or a 'decorator') is a client that wraps another client to intercept an outgoing
+request or an incoming response. As its name says, it is an implementation of `the decorator pattern`_.
+Client decoration takes a crucial role in Armeria. A lot of core features such as logging, metrics and
+distributed tracing are implemented as decorators and you will also find it useful when `separating concerns`_.
+
+There are basically two ways to write a decorating client:
+
+- Implementing :api:`DecoratingHttpClientFunction` and :api:`DecoratingRpcClientFunction`
+- Extending :api:`SimpleDecoratingClient`
+
+
+Implementing ``DecoratingHttpClientFunction`` and ``DecoratingRpcClientFunction``
+---------------------------------------------------------------------------------
+
+:api:`DecoratingHttpClientFunction` and :api:`DecoratingRpcClientFunction` are functional interfaces that
+greatly simplify the implementation of a decorating client.
+They enable you to write a decorating client with a single lambda expression:
+
+.. code-block:: java
+
+    import com.linecorp.armeria.common.HttpRequest;
+    import com.linecorp.armeria.common.HttpResponse;
+
+    ClientBuilder cb = Clients.builder(...);
+    ...
+    cb.decorator((delegate, ctx, req) -> {
+        auditRequest(req);
+        return delegate.execute(ctx, req);
+    });
+
+    MyService.Iface client = cb.build(MyService.Iface.class);
+
+Extending ``SimpleDecoratingHttpClient`` and ``SimpleDecoratingRpcClient``
+--------------------------------------------------------------------------
+
+If your decorator is expected to be reusable, it is recommended to define a new top-level class that extends
+:api:`SimpleDecoratingHttpClient` or :api:`SimpleDecoratingRpcClient` depending on whether you are decorating an
+:api:`HttpClient` or an :api:`RpcClient`:
+
+.. code-block:: java
+
+    import com.linecorp.armeria.client.HttpClient;
+    import com.linecorp.armeria.client.SimpleDecoratingHttpClient;
+
+    public class AuditClient extends SimpleDecoratingHttpClient {
+        public AuditClient(HttpClient delegate) {
+            super(delegate);
+        }
+
+        @Override
+        public HttpResponse execute(ClientRequestContext ctx, HttpRequest req) throws Exception {
+            auditRequest(req);
+            return delegate().execute(ctx, req);
+        }
+    }
+
+    ClientBuilder cb = Clients.builder(...);
+    ...
+    // Using a lambda expression:
+    cb.decorator(delegate -> new AuditClient(delegate));
+
+See also
+--------
+
+- :ref:`server-decorator`
+- :ref:`advanced-custom-attribute`
