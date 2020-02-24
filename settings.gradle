@@ -39,6 +39,7 @@ includeWithFlags ':benchmarks',               'java'
 includeWithFlags ':it:server',                'java', 'relocate'
 includeWithFlags ':it:spring:boot-tomcat',    'java', 'relocate'
 includeWithFlags ':it:spring:boot-tomcat8.5', 'java', 'relocate'
+includeWithFlags ':it:log-exporter',          'java', 'relocate'
 includeWithFlags ':testing-internal',         'java', 'relocate'
 includeWithFlags ':thrift0.12',               'java', 'relocate'
 

@@ -1,0 +1,16 @@
+<configuration debug="false">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%thread] %-5level %logger %mdc - %msg %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="RCEA" class="com.linecorp.armeria.common.logback.RequestContextExportingAppender">
+        <appender-ref ref="CONSOLE" />
+        <export>attrs.req_id:request_id_key</export>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="RCEA"/>
+    </root>
+</configuration>

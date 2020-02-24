@@ -1,0 +1,6 @@
+dependencies {
+    testImplementation project(':grpc')
+    testImplementation project(':logback')
+    testImplementation 'io.grpc:grpc-core'
+    testImplementation 'io.grpc:grpc-interop-testing'
+}
